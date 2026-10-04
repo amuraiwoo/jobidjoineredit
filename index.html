@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Job ID Joiner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- ヘッダー -->
+    <header class="glass border-b border-slate-800 py-4 px-6 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-gamepad text-white text-lg"></i>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Roblox Job ID Joiner</h1>
+            </div>
+            <div class="text-xs px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 flex items-center space-x-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Ready</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="max-w-xl w-full mx-auto p-4 sm:p-6 my-auto space-y-6">
+
+        <!-- メインパネル -->
+        <div class="glass rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-16 -top-16 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="space-y-5 relative z-10">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white mb-1">ダイレクト参加</h2>
+                    <p class="text-sm text-slate-400">参加したいサーバーの Job ID を貼り付けてボタンを押すだけです。</p>
+                </div>
+
+                <!-- フォーム -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                            <i class="fa-solid fa-server mr-1 text-purple-400"></i> Job ID (Server ID)
+                        </label>
+                        <input type="text" id="jobIdInput" placeholder="例: 3f8b1c20-4e2a-4c91-..." 
+                            class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all font-mono">
+                    </div>
+                </div>
+
+                <!-- アクションボタン -->
+                <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                    <button onclick="joinServer()" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2 active:scale-[0.98]">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span>サーバーに参加する</span>
+                    </button>
+                    <button onclick="clearInput()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-3.5 px-5 rounded-xl border border-slate-700 transition-all">
+                        クリア
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 履歴セクション -->
+        <div class="glass rounded-2xl p-5 sm:p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-history text-indigo-400"></i>
+                    <span>最近使用した Job ID 履歴</span>
+                </h3>
+                <button onclick="clearHistory()" class="text-xs text-slate-400 hover:text-red-400 transition-colors">履歴を削除</button>
+            </div>
+            <div id="historyList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                <div class="text-xs text-slate-500 text-center py-4">履歴はありません</div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- フッター -->
+    <footer class="text-center py-6 text-xs text-slate-500">
+        <p>&copy; 2026 Roblox Job ID Joiner</p>
+    </footer>
+
+    <!-- スクリプト -->
+    <script>
+        function joinServer() {
+            const jobId = document.getElementById('jobIdInput').value.trim();
+
+            if (!jobId) {
+                alert('Job IDを入力してください。');
+                return;
+            }
+
+            // Roblox公式のゲーム開始URLにJob IDを組み込んで直接起動を試みる
+            // ※特定のゲームに紐づかない純粋なJob ID直接起動用スキーム・URL
+            const joinUrl = `https://www.roblox.com/games/start?jobId=${encodeURIComponent(jobId)}`;
+            
+            saveHistory(jobId);
+            window.location.href = joinUrl;
+        }
+
+        function clearInput() {
+            document.getElementById('jobIdInput').value = '';
+        }
+
+        function saveHistory(jobId) {
+            let history = JSON.parse(localStorage.getItem('roblox_job_history') || '[]');
+            history = history.filter(item => item !== jobId);
+            history.unshift(jobId);
+            if (history.length > 10) history.pop();
+            localStorage.setItem('roblox_job_history', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const historyList = document.getElementById('historyList');
+            const history = JSON.parse(localStorage.getItem('roblox_job_history') || '[]');
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="text-xs text-slate-500 text-center py-4">履歴はありません</div>';
+                return;
+            }
+
+            historyList.innerHTML = history.map(jobId => `
+                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs hover:border-slate-700 transition-all">
+                    <div class="text-slate-300 font-mono truncate mr-2">${jobId}</div>
+                    <button onclick="fillAndJoin('${jobId}')" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white px-3 py-1.5 rounded-lg transition-all font-medium shrink-0">
+                        参加
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function fillAndJoin(jobId) {
+            document.getElementById('jobIdInput').value = jobId;
+            joinServer();
+        }
+
+        function clearHistory() {
+            localStorage.removeItem('roblox_job_history');
+            loadHistory();
+        }
+
+        window.onload = loadHistory;
+    </script>
+</body>
+</html>
