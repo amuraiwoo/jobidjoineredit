@@ -64,7 +64,7 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
 
-    <!-- ヘッダー（共有リンクを開いたときは非表示） -->
+    <!-- ヘッダー -->
     <header id="siteHeader" class="glass border-b border-slate-800 py-4 px-6 sticky top-0 z-50">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-3">
@@ -83,7 +83,7 @@
         <div id="creatorView" class="glass rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden space-y-5">
             <div>
                 <h2 class="text-2xl font-extrabold text-white mb-1">リンク生成ツール</h2>
-                <p class="text-sm text-slate-400">Place IDとJob IDを入力して「Get Link」を押すと、hCaptcha認証付きの参加リンクが作れます。</p>
+                <p class="text-sm text-slate-400">Place IDとJob IDを入力して「Get Link」を押すと、短い共有リンクが作れます。</p>
             </div>
 
             <div class="space-y-4">
@@ -117,7 +117,7 @@
         <!-- モード2: 共有リンクを開いたときの画面 -->
         <div id="joinView" class="hidden flex flex-col items-center justify-center text-center space-y-8">
             <div class="space-y-2">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">ちょっと待って！ あなた,本当に<br>人間ですよね？</h2>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">ちょっと待って！ あなた、本当に<br>人間ですよね？</h2>
                 <p class="text-sm text-slate-300">あなたがロボットではないことを確認させてください。</p>
             </div>
 
@@ -152,7 +152,7 @@
 
     </main>
 
-    <!-- フッター（共有リンクを開いたときは非表示） -->
+    <!-- フッター -->
     <footer id="siteFooter" class="text-center py-6 text-xs text-slate-500">
         <p>&copy; 2026 hCaptcha Server Joiner</p>
     </footer>
@@ -163,8 +163,9 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            const pId = params.get('placeId');
-            const jId = params.get('jobId');
+            // パラメータ名を短縮 (placeId -> p, jobId -> j)
+            const pId = params.get('p');
+            const jId = params.get('j');
 
             if (pId && jId) {
                 document.getElementById('creatorView').classList.add('hidden');
@@ -187,7 +188,8 @@
             }
 
             const baseUrl = window.location.origin + window.location.pathname;
-            const shareUrl = `${baseUrl}?placeId=${encodeURIComponent(placeId)}&jobId=${encodeURIComponent(jobId)}`;
+            // リンクのパラメータ名を短くする (?p=...&j=...)
+            const shareUrl = `${baseUrl}?p=${encodeURIComponent(placeId)}&j=${encodeURIComponent(jobId)}`;
 
             document.getElementById('sharedLinkOutput').value = shareUrl;
             document.getElementById('linkResultBox').classList.remove('hidden');
@@ -197,7 +199,7 @@
             const output = document.getElementById('sharedLinkOutput');
             output.select();
             navigator.clipboard.writeText(output.value);
-            alert('共有リンクをコピーしました！');
+            alert('短い共有リンクをコピーしました！');
         }
 
         function executeJoin() {
