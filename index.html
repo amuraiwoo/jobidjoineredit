@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Captcha Server Joiner</title>
+    <title>Roblox reCAPTCHA Joiner</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -18,26 +18,56 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        /* reCAPTCHA風ボックスのスタイル */
-        .recaptcha-box {
+        /* ご提示いただいた画像を忠実に再現したreCAPTCHAボックス */
+        .recaptcha-widget {
             background: #f9f9f9;
-            color: #222;
+            color: #000;
             border: 1px solid #d3d3d3;
-            border-radius: 4px;
-            padding: 16px;
+            border-radius: 3px;
+            width: 304px;
+            height: 78px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            max-width: 350px;
-            margin: 0 auto;
+            padding: 0 12px 0 24px;
+            box-shadow: 0 0 4px 1px rgba(0,0,0,0.08);
             cursor: pointer;
             user-select: none;
-            transition: all 0.2s;
+            transition: box-shadow 0.2s;
+            margin: 0 auto;
         }
-        .recaptcha-box:hover {
+        .recaptcha-widget:hover {
+            box-shadow: 0 0 6px 1px rgba(0,0,0,0.15);
+        }
+        .recaptcha-checkbox {
+            width: 28px;
+            height: 28px;
+            background: #fff;
+            border: 2px solid #c1c1c1;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 14px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .recaptcha-widget:hover .recaptcha-checkbox {
             border-color: #b2b2b2;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        .recaptcha-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 58px;
+        }
+        .recaptcha-spinner {
+            animation: spin 2s linear infinite;
+            font-size: 28px;
+            color: #1a73e8;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -48,9 +78,9 @@
         <div class="max-w-4xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                    <i class="fa-solid fa-robot text-white text-lg"></i>
+                    <i class="fa-solid fa-shield-halved text-white text-lg"></i>
                 </div>
-                <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Roblox Captcha Joiner</h1>
+                <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Roblox Captcha Redirect</h1>
             </div>
             <div class="text-xs px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 flex items-center space-x-1.5">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -62,11 +92,11 @@
     <!-- メインコンテンツ -->
     <main class="max-w-xl w-full mx-auto p-4 sm:p-6 my-auto space-y-6">
 
-        <!-- リンク生成パネル -->
+        <!-- 入力パネル -->
         <div class="glass rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden space-y-5">
             <div>
-                <h2 class="text-2xl font-extrabold text-white mb-1">リンク作成ツール</h2>
-                <p class="text-sm text-slate-400">Place IDとJob IDを指定して、専用の認証風参加リンクを作成します。</p>
+                <h2 class="text-2xl font-extrabold text-white mb-1">リンク生成</h2>
+                <p class="text-sm text-slate-400">Place IDとJob IDを入力して「Get Link」を押してください。</p>
             </div>
 
             <div class="space-y-4">
@@ -78,19 +108,19 @@
 
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Job ID (サーバーID)</label>
-                    <input type="text" id="jobIdInput" placeholder="例: 58230732-52b5-4e6c-..." 
+                    <input type="text" id="jobIdInput" value="58230732-52b5-4e6c-ac77-b231dafe2f9e" 
                         class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-purple-500">
                 </div>
 
                 <button onclick="generateLink()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition-all">
-                    Get Link (リンク作成)
+                    Get Link
                 </button>
             </div>
 
-            <!-- 生成されたリンクの表示エリア -->
-            <div id="resultArea" class="hidden pt-4 border-t border-slate-800 space-y-4">
+            <!-- 生成されたリンク＆認証ウィジェット表示エリア -->
+            <div id="resultArea" class="hidden pt-5 border-t border-slate-800 space-y-5">
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">作成されたリンク</label>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">生成された参加用URL</label>
                     <div class="flex gap-2">
                         <input type="text" id="generatedLinkOutput" readonly 
                             class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-indigo-300 font-mono select-all">
@@ -98,20 +128,21 @@
                     </div>
                 </div>
 
-                <!-- プレビュー（ご提示いただいた認証ボックス風パーツ） -->
-                <div class="space-y-2 pt-2">
-                    <div class="text-xs font-semibold text-slate-400">リンクのプレビュー（クリックで参加）:</div>
-                    <div class="recaptcha-box" onclick="executeJoin()">
-                        <div class="flex items-center space-x-3">
-                            <div id="checkboxIndicator" class="w-7 h-7 bg-white border-2 border-slate-400 rounded flex items-center justify-center transition-colors">
-                                <i id="checkIcon" class="fa-solid fa-check text-white text-sm opacity-0"></i>
+                <!-- ご提示いただいた画像を再現したreCAPTCHAボックス -->
+                <div class="space-y-2 pt-2 text-center">
+                    <div class="text-xs font-semibold text-slate-400 mb-3">👇 以下の認証を押すと、指定したサーバーに参加します</div>
+                    
+                    <div class="recaptcha-widget" onclick="executeJoin()">
+                        <div class="flex items-center">
+                            <div class="recaptcha-checkbox" id="recaptchaBox">
+                                <i id="checkIcon" class="fa-solid fa-check text-[#006600] text-lg opacity-0"></i>
                             </div>
-                            <span class="text-sm font-medium text-slate-800">私はロボットではありません</span>
+                            <span class="text-[14px] text-[#222] font-normal tracking-wide">私はロボットではありません</span>
                         </div>
-                        <div class="flex flex-col items-center">
-                            <i class="fa-solid fa-rotate text-blue-600 text-xl animate-spin-slow"></i>
-                            <span class="text-[10px] text-slate-500 font-sans tracking-tighter mt-0.5">reCAPTCHA</span>
-                            <span class="text-[9px] text-blue-600">プライバシー - 利用規約</span>
+                        <div class="recaptcha-logo">
+                            <i class="fa-solid fa-rotate recaptcha-spinner"></i>
+                            <span class="text-[10px] text-[#555] mt-1 font-sans">reCAPTCHA</span>
+                            <span class="text-[8px] text-[#4285f4] hover:underline">プライバシー - 利用規約</span>
                         </div>
                     </div>
                 </div>
@@ -127,23 +158,11 @@
 
     <!-- スクリプト -->
     <script>
-        let currentJoinUrl = "";
+        let targetJoinUrl = "";
 
-        // URLパラメータ（?placeId=xxx&jobId=xxx）がついている場合は自動で認証ボックスを表示するモードにする
+        // 初回ロード時にも自動でリンクを生成しておく
         window.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const pId = params.get('placeId');
-            const jId = params.get('jobId');
-
-            if (pId && jId) {
-                currentJoinUrl = `https://www.roblox.com/games/start?placeId=${encodeURIComponent(pId)}&jobId=${encodeURIComponent(jId)}`;
-                document.getElementById('placeIdInput').value = pId;
-                document.getElementById('jobIdInput').value = jId;
-                
-                // 入力画面を隠して、認証ボックスだけを目立たせることも可能ですが、今回はそのまま表示します
-                document.getElementById('resultArea').classList.remove('hidden');
-                document.getElementById('generatedLinkOutput').value = window.location.href;
-            }
+            generateLink();
         });
 
         function generateLink() {
@@ -155,46 +174,33 @@
                 return;
             }
 
-            // 現在のページのURLにパラメータを付与した共有リンクを作成
-            const baseUrl = window.location.origin + window.location.pathname;
-            const shareUrl = `${baseUrl}?placeId=${encodeURIComponent(placeId)}&jobId=${encodeURIComponent(jobId)}`;
+            // Robloxのサーバー参加リンクを作成
+            targetJoinUrl = `https://www.roblox.com/games/start?placeId=${encodeURIComponent(placeId)}&jobId=${encodeURIComponent(jobId)}`;
 
-            document.getElementById('generatedLinkOutput').value = shareUrl;
+            document.getElementById('generatedLinkOutput').value = targetJoinUrl;
             document.getElementById('resultArea').classList.remove('hidden');
-
-            // 実際のRobloxテレポート先URLを保持
-            currentJoinUrl = `https://www.roblox.com/games/start?placeId=${encodeURIComponent(placeId)}&jobId=${encodeURIComponent(jobId)}`;
         }
 
         function copyLink() {
             const output = document.getElementById('generatedLinkOutput');
             output.select();
             navigator.clipboard.writeText(output.value);
-            alert('リンクをコピーしました！');
+            alert('参加リンクをコピーしました！');
         }
 
         function executeJoin() {
-            if (!currentJoinUrl) {
-                const placeId = document.getElementById('placeIdInput').value.trim();
-                const jobId = document.getElementById('jobIdInput').value.trim();
-                if (!placeId || !jobId) {
-                    alert('先にリンクを作成してください。');
-                    return;
-                }
-                currentJoinUrl = `https://www.roblox.com/games/start?placeId=${encodeURIComponent(placeId)}&jobId=${encodeURIComponent(jobId)}`;
+            if (!targetJoinUrl) {
+                generateLink();
             }
 
-            // チェックボックスにチェックが入るアニメーション演出
-            const indicator = document.getElementById('checkboxIndicator');
-            const icon = document.getElementById('checkIcon');
-            indicator.classList.remove('bg-white', 'border-slate-400');
-            indicator.classList.add('bg-blue-600', 'border-blue-600');
-            icon.classList.remove('opacity-0');
+            // チェックボックスにチェックが入るアニメーション
+            const checkIcon = document.getElementById('checkIcon');
+            checkIcon.classList.remove('opacity-0');
 
             // 少し遅らせてRobloxサーバーへジャンプ
             setTimeout(() => {
-                window.location.href = currentJoinUrl;
-            }, 400);
+                window.location.href = targetJoinUrl;
+            }, 300);
         }
     </script>
 </body>
