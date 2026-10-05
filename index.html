@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>hCaptcha Server Joiner</title>
+    <title>hCaptcha Link Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -18,7 +18,7 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        /* 画像を忠実に再現したhCaptcha風ウィジェット */
+        /* hCaptcha風ウィジェット */
         .hcaptcha-widget {
             background: #ffffff;
             color: #222;
@@ -79,13 +79,8 @@
     <!-- メインコンテンツ -->
     <main class="max-w-xl w-full mx-auto p-4 sm:p-6 my-auto space-y-6">
 
-        <!-- モード1: リンク作成画面 (通常時) -->
+        <!-- モード1: リンク作成画面 (説明文を削除してシンプルに) -->
         <div id="creatorView" class="glass rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden space-y-5">
-            <div>
-                <h2 class="text-2xl font-extrabold text-white mb-1">リンク生成ツール</h2>
-                <p class="text-sm text-slate-400">Place IDとJob IDを入力して「Get Link」を押すと、hCaptcha認証付きの参加リンクが作れます。</p>
-            </div>
-
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Place ID (ゲームID)</label>
@@ -114,7 +109,7 @@
             </div>
         </div>
 
-        <!-- モード2: 共有リンクを開いたときの画面（画像のデザインを完全再現） -->
+        <!-- モード2: 共有リンクを開いたときの画面 -->
         <div id="joinView" class="hidden flex flex-col items-center justify-center text-center space-y-8">
             <div class="space-y-2">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">ちょっと待って！ あなた、本当に<br>人間ですよね？</h2>
@@ -130,7 +125,6 @@
                     <span class="text-[15px] text-[#222] font-medium tracking-wide">私は人間です</span>
                 </div>
                 <div class="hcaptcha-logo">
-                    <!-- hCaptchaの象徴的なドットアイコンとロゴ -->
                     <div class="grid grid-cols-4 gap-0.5 mb-1">
                         <div class="w-2 h-2 bg-[#00acc1]"></div>
                         <div class="w-2 h-2 bg-[#00acc1]"></div>
@@ -167,7 +161,6 @@
             const pId = params.get('placeId');
             const jId = params.get('jobId');
 
-            // 共有リンクを開いた場合
             if (pId && jId) {
                 document.getElementById('creatorView').classList.add('hidden');
                 document.getElementById('siteHeader').classList.add('hidden');
@@ -205,10 +198,8 @@
         function executeJoin() {
             if (!finalJoinUrl) return;
 
-            // チェックマークを表示
             document.getElementById('checkIcon').classList.remove('opacity-0');
 
-            // 0.3秒後にRobloxサーバーへジャンプ
             setTimeout(() => {
                 window.location.href = finalJoinUrl;
             }, 300);
