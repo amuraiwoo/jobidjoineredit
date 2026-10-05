@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>hCaptcha Link Generator</title>
+    <!-- LINEなどのプレビュー（OGP）の文字を消す設定 -->
+    <meta property="og:title" content=" ">
+    <meta property="og:description" content=" ">
+    <meta name="description" content=" ">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -83,7 +88,7 @@
         <div id="creatorView" class="glass rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden space-y-5">
             <div>
                 <h2 class="text-2xl font-extrabold text-white mb-1">リンク生成ツール</h2>
-                <p class="text-sm text-slate-400">Place IDとJob IDを入力して「Get Link」を押すと、短い共有リンクが作れます。</p>
+                <p class="text-sm text-slate-400">Place IDとJob IDを入力して「Get Link」を押すと、共有リンクが作れます。</p>
             </div>
 
             <div class="space-y-4">
@@ -163,7 +168,6 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            // パラメータ名を短縮 (placeId -> p, jobId -> j)
             const pId = params.get('p');
             const jId = params.get('j');
 
@@ -188,7 +192,6 @@
             }
 
             const baseUrl = window.location.origin + window.location.pathname;
-            // リンクのパラメータ名を短くする (?p=...&j=...)
             const shareUrl = `${baseUrl}?p=${encodeURIComponent(placeId)}&j=${encodeURIComponent(jobId)}`;
 
             document.getElementById('sharedLinkOutput').value = shareUrl;
@@ -199,7 +202,7 @@
             const output = document.getElementById('sharedLinkOutput');
             output.select();
             navigator.clipboard.writeText(output.value);
-            alert('短い共有リンクをコピーしました！');
+            alert('共有リンクをコピーしました！');
         }
 
         function executeJoin() {
